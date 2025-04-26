@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import FileUploader from '@/components/FileUploader';
 import ResultsDisplay, { DetailError } from '@/components/ResultsDisplay';
 import PromptEditor from '@/components/PromptEditor';
 import SupportForm from '@/components/SupportForm';
+import APIKeySetup from '@/components/APIKeySetup';
 import { Button } from '@/components/ui/button';
 import { Settings, Mail } from 'lucide-react';
-import { analyzeDocument, DEFAULT_AI_PROMPT } from '@/utils/aiProcessing';
+import { analyzeDocument, DEFAULT_AI_PROMPT, hasValidAPIKey } from '@/utils/openai';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -15,11 +17,26 @@ const Index = () => {
   const [aiPrompt, setAiPrompt] = useState(DEFAULT_AI_PROMPT);
   const [promptEditorOpen, setPromptEditorOpen] = useState(false);
   const [supportFormOpen, setSupportFormOpen] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    setHasApiKey(hasValidAPIKey());
+  }, []);
+
   const handleFileUpload = async (uploadedFile: File) => {
+    if (!hasApiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please set up your OpenAI API key first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setFile(uploadedFile);
     setIsProcessing(true);
+    setErrors([]);
     
     try {
       const results = await analyzeDocument(uploadedFile, aiPrompt);
@@ -36,10 +53,10 @@ const Index = () => {
           description: `Found ${results.length} attention to detail issue${results.length !== 1 ? 's' : ''}.`,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "There was a problem analyzing your document.",
+        description: error.message || "There was a problem analyzing your document.",
         variant: "destructive",
       });
       console.error("Error processing document:", error);
@@ -86,25 +103,33 @@ const Index = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex flex-col items-center space-y-8">
-            <div className="w-full max-w-2xl">
-              <FileUploader onFileUpload={handleFileUpload} isProcessing={isProcessing} />
-              
-              {file && !isProcessing && errors.length === 0 && (
-                <div className="mt-4 p-4 bg-green-50 rounded-md">
-                  <p className="text-green-800 text-center">
-                    No attention to detail issues found in {file.name}
-                  </p>
+            {!hasApiKey ? (
+              <div className="w-full max-w-2xl">
+                <APIKeySetup onKeySet={() => setHasApiKey(true)} />
+              </div>
+            ) : (
+              <>
+                <div className="w-full max-w-2xl">
+                  <FileUploader onFileUpload={handleFileUpload} isProcessing={isProcessing} />
+                  
+                  {file && !isProcessing && errors.length === 0 && (
+                    <div className="mt-4 p-4 bg-green-50 rounded-md">
+                      <p className="text-green-800 text-center">
+                        No attention to detail issues found in {file.name}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            
-            <div className="w-full">
-              <ResultsDisplay 
-                fileName={file?.name || ''} 
-                errors={errors} 
-                isLoading={isProcessing} 
-              />
-            </div>
+                
+                <div className="w-full">
+                  <ResultsDisplay 
+                    fileName={file?.name || ''} 
+                    errors={errors} 
+                    isLoading={isProcessing} 
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </main>
