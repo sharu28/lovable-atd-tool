@@ -45,10 +45,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload, isProcessing 
   };
 
   const validateAndUploadFile = (file: File) => {
-    if (file.type !== 'application/pdf') {
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    
+    if (!validTypes.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please upload a PDF file",
+        description: "Please upload a PDF or Word document (.docx)",
         variant: "destructive",
       });
       return;
@@ -75,7 +77,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload, isProcessing 
         type="file"
         className="hidden"
         onChange={handleChange}
-        accept="application/pdf"
+        accept=".pdf,.docx"
         disabled={isProcessing}
       />
       
@@ -83,9 +85,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileUpload, isProcessing 
         <div className="rounded-full bg-brand-light-purple/10 p-4">
           <Upload className="h-10 w-10 text-brand-purple" />
         </div>
-        <h3 className="text-lg font-medium">Upload your SOA</h3>
+        <h3 className="text-lg font-medium">Upload your document</h3>
         <p className="text-sm text-gray-500 max-w-xs">
-          Drag and drop your PDF file here, or click the button below to select a file
+          Drag and drop your PDF or Word document here, or click the button below
         </p>
         <Button 
           onClick={handleButtonClick}

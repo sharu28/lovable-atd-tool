@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import FileUploader from '@/components/FileUploader';
 import ResultsDisplay, { DetailError } from '@/components/ResultsDisplay';
@@ -58,9 +57,9 @@ const Index = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Detail Detective</h1>
-              <p className="text-gray-500">AI-powered attention to detail checker</p>
+            <div className="text-center w-full">
+              <h1 className="text-3xl font-bold text-gray-900">Attention to Detail Checker</h1>
+              <p className="text-gray-500">AI-powered document analysis</p>
             </div>
             <div className="flex space-x-2">
               <Button 
@@ -84,11 +83,10 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Upload Your Document</h2>
+          <div className="flex flex-col items-center space-y-8">
+            <div className="w-full max-w-2xl">
               <FileUploader onFileUpload={handleFileUpload} isProcessing={isProcessing} />
               
               {file && !isProcessing && errors.length === 0 && (
@@ -100,7 +98,7 @@ const Index = () => {
               )}
             </div>
             
-            <div>
+            <div className="w-full">
               <ResultsDisplay 
                 fileName={file?.name || ''} 
                 errors={errors} 
